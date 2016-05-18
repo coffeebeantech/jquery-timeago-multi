@@ -25,15 +25,16 @@
     factory(jQuery);
   }
 }(function ($) {
-  $.timeago = function(timestamp) {
+  $.timeago = function(timestamp, language) {
+    language = language || 'en';
     if (timestamp instanceof Date) {
-      return inWords(timestamp);
+      return inWords(timestamp, language);
     } else if (typeof timestamp === "string") {
-      return inWords($.timeago.parse(timestamp));
+      return inWords($.timeago.parse(timestamp), language);
     } else if (typeof timestamp === "number") {
-      return inWords(new Date(timestamp));
+      return inWords(new Date(timestamp), language);
     } else {
-      return inWords($.timeago.datetime(timestamp));
+      return inWords($.timeago.datetime(timestamp), language);
     }
   };
   var $t = $.timeago;
@@ -47,33 +48,52 @@
       cutoff: 0,
       autoDispose: true,
       strings: {
-        prefixAgo: null,
-        prefixFromNow: null,
-        suffixAgo: "ago",
-        suffixFromNow: "from now",
-        inPast: 'any moment now',
-        seconds: "less than a minute",
-        minute: "about a minute",
-        minutes: "%d minutes",
-        hour: "about an hour",
-        hours: "about %d hours",
-        day: "a day",
-        days: "%d days",
-        month: "about a month",
-        months: "%d months",
-        year: "about a year",
-        years: "%d years",
-        wordSeparator: " ",
-        numbers: []
+        en: {
+          prefixAgo: null,
+          prefixFromNow: null,
+          suffixAgo: "ago",
+          suffixFromNow: "from now",
+          inPast: 'any moment now',
+          seconds: "less than a minute",
+          minute: "about a minute",
+          minutes: "%d minutes",
+          hour: "about an hour",
+          hours: "about %d hours",
+          day: "a day",
+          days: "%d days",
+          month: "about a month",
+          months: "%d months",
+          year: "about a year",
+          years: "%d years",
+          wordSeparator: " ",
+          numbers: []
+        },
+        pt_br: {
+          prefixAgo: "há",
+          prefixFromNow: "em",
+          suffixAgo: null,
+          suffixFromNow: null,
+          seconds: "alguns segundos",
+          minute: "um minuto",
+          minutes: "%d minutos",
+          hour: "uma hora",
+          hours: "%d horas",
+          day: "um dia",
+          days: "%d dias",
+          month: "um mês",
+          months: "%d meses",
+          year: "um ano",
+          years: "%d anos"
+        }
       }
     },
 
-    inWords: function(distanceMillis) {
+    inWords: function(distanceMillis, language) {
       if (!this.settings.allowPast && ! this.settings.allowFuture) {
           throw 'timeago allowPast and allowFuture settings can not both be set to false.';
       }
 
-      var $l = this.settings.strings;
+      var $l = this.settings.strings[language] || this.settings.strings;
       var prefix = $l.prefixAgo;
       var suffix = $l.suffixAgo;
       if (this.settings.allowFuture) {
@@ -84,7 +104,7 @@
       }
 
       if (!this.settings.allowPast && distanceMillis >= 0) {
-        return this.settings.strings.inPast;
+        return $l.inPast;
       }
 
       var seconds = Math.abs(distanceMillis) / 1000;
@@ -211,8 +231,8 @@
     return element.data("timeago");
   }
 
-  function inWords(date) {
-    return $t.inWords(distance(date));
+  function inWords(date, language) {
+    return $t.inWords(distance(date), language);
   }
 
   function distance(date) {
